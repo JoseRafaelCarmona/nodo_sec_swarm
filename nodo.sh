@@ -61,7 +61,8 @@ function conectarse_swarm(){
     echo '   OK'
 }
 
-validarParams $@
+
+validarParams "$@"
 echo '-->Comprobando si eres usuario root:'
 usuario_root
 echo '-->Comprobando sistema operativo'
