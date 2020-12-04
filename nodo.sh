@@ -83,6 +83,6 @@ chmod +x ceph/install_ceph.sh
 chmod -R +x ceph/
 cd ceph/ && bash ./install_ceph.sh "$ip_master" "$punto_montaje"
 echo '-->Instalando keepalived'
-chmod +x keepalived/install_keepalived.sh
+chmod -R +x keepalived/
 cd keepalived/ && bash ./install_keepalived.sh "$ip_master" "$interface"
 echo "-->listo"

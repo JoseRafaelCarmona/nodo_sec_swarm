@@ -25,7 +25,7 @@ function install_keepalived(){
               -e KEEPALIVED_INTERFACE=$4 \
               -e KEEPALIVED_UNICAST_PEERS="#PYTHON2BASH:[$1,$2]" \
               -e KEEPALIVED_VIRTUAL_IPS=$3 \
-              -e KEEPALIVED_PRIORITY=200 \
+              -e KEEPALIVED_PRIORITY=100 \
               osixia/keepalived
 }
 
