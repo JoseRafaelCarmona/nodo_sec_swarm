@@ -26,6 +26,7 @@ function instalando_ceph(){
 function crear_carpeta_ceph(){
         existe_directorio "/mnt/ceph"
         mkdir /mnt/ceph && mount /mnt/ceph
+        mount -a
 }
 
 function obteniendo_llave_ceph(){
