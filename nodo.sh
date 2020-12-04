@@ -63,6 +63,7 @@ function conectarse_swarm(){
 
 ip_master=$1
 punto_montaje=$2
+interface=$3
 
 validarParams "$@"
 echo '-->Comprobando si eres usuario root:'
@@ -81,3 +82,7 @@ echo 'Iniciando la instalacion de ceph..'
 chmod +x ceph/install_ceph.sh
 chmod -R +x ceph/
 cd ceph/ && bash ./install_ceph.sh "$ip_master" "$punto_montaje"
+echo '-->Instalando keepalived'
+chmod +x keepalived/install_keepalived.sh
+cd keepalived/ && bash ./install_keepalived.sh "$ip_master" "$interface"
+echo "-->listo"
