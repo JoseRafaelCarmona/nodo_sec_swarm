@@ -10,7 +10,6 @@ function validacion(){
 
 function validarParams(){
     [[ ! $# -eq 2 ]] && { echo "Tu número de parámetros no es el correcto"; modoUso; exit 1; }
-    comprobar_ping $1
     validar_punto_montaje $2
 }
 
