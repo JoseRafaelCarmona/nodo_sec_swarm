@@ -9,13 +9,13 @@ function validacion(){
 }
 
 function validarParams(){
-    [[ ! $# -eq 2 ]] && { echo "Tu número de parámetros no es el correcto"; modoUso; exit 1; }
+    [[ ! $# -eq 3 ]] && { echo "Tu número de parámetros no es el correcto"; modoUso; exit 1; }
     validar_punto_montaje $2
 }
 
 function modoUso(){
-    echo 'Para ejecutar el script: nodo.sh IP-MANAGER PUNTO-MONTAJE'
-    echo 'Ejemplo: ./nodo.sh 192.168.1.1 /dev/sda1'
+    echo 'Para ejecutar el script: nodo.sh IP-MANAGER PUNTO-MONTAJE NUMERODE-NODO'
+    echo 'Ejemplo: ./nodo.sh 192.168.1.1 /dev/sda1 2'
 }
 
 function usuario_root(){
@@ -63,6 +63,7 @@ function conectarse_swarm(){
 ip_master=$1
 punto_montaje=$2
 interface=$3
+nodo=$4
 
 validarParams "$@"
 echo '-->Comprobando si eres usuario root:'
@@ -81,7 +82,9 @@ echo 'Iniciando la instalacion de ceph..'
 chmod +x ceph/install_ceph.sh
 chmod -R +x ceph/
 cd ceph/ && bash ./install_ceph.sh "$ip_master" "$punto_montaje"
-echo '-->Instalando keepalived'
-chmod -R +x keepalived/
-cd keepalived/ && bash ./install_keepalived.sh "$ip_master" "$interface"
-echo "-->listo"
+if [ $nodo -eq 2 ]; then
+    echo '-->Instalando keepalived'
+    chmod -R +x keepalived/
+    cd keepalived/ && bash ./install_keepalived.sh "$ip_master" "$interface"
+    echo "-->listo"
+fi
