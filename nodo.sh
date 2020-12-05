@@ -11,6 +11,7 @@ function validacion(){
 function validarParams(){
     [[ ! $# -eq 3 ]] && { echo "Tu número de parámetros no es el correcto"; modoUso; exit 1; }
     validar_punto_montaje $2
+    validar_interface $3
 }
 
 function modoUso(){
@@ -25,6 +26,11 @@ function usuario_root(){
         echo '   ERROR: Debes ser el usuario root';
         exit 1;
     fi
+}
+
+function validar_interface(){
+  ip add | grep -wom 1 $1
+  validacion "$(echo $?)"
 }
 
 function validar_punto_montaje(){
