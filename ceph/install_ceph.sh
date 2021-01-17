@@ -25,7 +25,8 @@ function instalando_ceph(){
 
 # shellcheck disable=SC2120
 function crear_carpeta_ceph(){
-        sleep 60
+        echo "En espera del despliegue del contenedor mds en este nodo"
+        sleep 90
         ssh root@$1 mount /mnt/ceph
         existe_directorio "/mnt/ceph"
         mkdir /mnt/ceph && mount /mnt/ceph

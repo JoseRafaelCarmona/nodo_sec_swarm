@@ -9,7 +9,7 @@ function validacion(){
 }
 
 function validarParams(){
-    [[ ! $# -eq 4 ]] && { echo "Tu número de parámetros no es el correcto"; modoUso; exit 1; }
+    [[ ! $# -eq 3 ]] && { echo "Tu número de parámetros no es el correcto"; modoUso; exit 1; }
     validar_punto_montaje $2
     validar_interface $3
 }
