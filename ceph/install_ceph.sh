@@ -23,7 +23,10 @@ function instalando_ceph(){
         echo $1':/ /mnt/ceph ceph _netdev,name=swarm,secretfile=/root/.ceph 0 0' >> /etc/fstab
 }
 
+# shellcheck disable=SC2120
 function crear_carpeta_ceph(){
+        sleep 60
+        ssh root@$1 mount /mnt/ceph
         existe_directorio "/mnt/ceph"
         mkdir /mnt/ceph && mount /mnt/ceph
         mount -a
@@ -34,8 +37,7 @@ function obteniendo_llave_ceph(){
 }
 
 install_xfsprogs $2
-configuracion_ceph
 instalando_ceph $1
 obteniendo_llave_ceph $1
-crear_carpeta_ceph
+crear_carpeta_ceph $1
 echo "-->listo"
