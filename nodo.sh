@@ -100,7 +100,10 @@ echo '-->Permitir login ssh root'
 permitir_root_login
 echo '-->Conectanose a swarm'
 conectarse_swarm $1
-echo 'Iniciando la instalacion de ceph..'
+echo '-->Iniciando la instalacion de ceph..'
 chmod +x ceph/install_ceph.sh
 chmod -R +x ceph/
 cd ceph/ && bash ./install_ceph.sh "$ip_master" "$punto_montaje"
+echo '-->Instalando keepalived...'
+keepalived $ip_master $interface
+echo '--> Listo'
