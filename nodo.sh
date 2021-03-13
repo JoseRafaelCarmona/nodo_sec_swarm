@@ -2,14 +2,14 @@
 
 function validacion(){
     if [ $1 != "0" ]; then
-        echo "-->Mal";
+        echo -e "\e[31m       Mal\e[0m";
         exit 1;
     fi
-        echo '   OK';
+        echo -e "\e[32m       OK\e[0m";
 }
 
 function validarParams(){
-    [[ ! $# -eq 3 ]] && { echo "Tu número de parámetros no es el correcto"; modoUso; exit 1; }
+    [[ ! $# -eq 3 ]] && { echo -e "\e[31mTu número de parámetros no es el correcto\e[0m"; modoUso; exit 1; }
     validar_punto_montaje $2
     validar_interface $3
 }
@@ -21,9 +21,9 @@ function modoUso(){
 
 function usuario_root(){
     if [ $EUID -eq 0 ]; then
-        echo '   OK';
+        echo -e "\e[32m       OK\e[0m";
     else
-        echo '   ERROR: Debes ser el usuario root';
+        echo -e "\e[31mDebes ser el usuario root para realizar esto\e[0m";
         exit 1;
     fi
 }
@@ -57,13 +57,13 @@ function validar_docker(){
 function permitir_root_login(){
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
     systemctl restart sshd
-    echo '   OK'
+    echo -e "\e[32m       OK\e[0m";
 }
 
 function conectarse_swarm(){
-    DOCKER_SWARM=$(ssh root@$1 cat /root/.key_swarm)
+    DOCKER_SWARM=$(ssh root@$1 cat /root/.configsCluster/.key_swarm)
     $DOCKER_SWARM
-    echo '   OK'
+    echo -e "\e[32m       OK\e[0m";
 }
 
 
@@ -78,35 +78,41 @@ function install_keepalived(){
 }
 
 function keepalived(){
-        IP_VIRTUAL=$(ssh root@$1 cat /root/.ip_virtual)
-        IP_NODO=$(ssh root@$1 cat /root/.ip_nodo)
+        IP_VIRTUAL=$(ssh root@$1 cat /root/.configsCluster/.ip_virtual)
+        IP_NODO=$(ssh root@$1 cat /root/.configsCluster/nodo_backup_keepalived)
         install_keepalived $1 $IP_NODO $IP_VIRTUAL $2
 }
 
-ip_master=$1
-punto_montaje=$2
-interface=$3
-nodo=$4
+function main(){
+        validarParams "$@"
+        echo '-->Comprobando si eres usuario root:'
+        usuario_root
+        echo '-->Comprobando sistema operativo'
+        validar_os
+        echo '-->Acceso a internet'
+        acceso_internet
+        echo '-->Comprobando docker'
+        validar_docker
+        echo '-->Permitir login ssh root'
+        permitir_root_login
+        echo '-->Conectanose a swarm'
+        conectarse_swarm $1
+        echo 'Iniciando la instalacion de ceph..'
+        chmod +x ceph/install_ceph.sh
+        chmod -R +x ceph/
+        cd ceph/ && bash ./install_ceph.sh "$ip_master" "$punto_montaje"
+        if [[ $nodo -eq 2 ]]; then
+            echo '-->Instalando keepalived'
+            keepalived "$ip_master" "$interface"
+            echo "-->listo"
+        fi
 
-validarParams "$@"
-echo '-->Comprobando si eres usuario root:'
-usuario_root
-echo '-->Comprobando sistema operativo'
-validar_os
-echo '-->Acceso a internet'
-acceso_internet
-echo '-->Comprobando docker'
-validar_docker
-echo '-->Permitir login ssh root'
-permitir_root_login
-echo '-->Conectanose a swarm'
-conectarse_swarm $1
-echo 'Iniciando la instalacion de ceph..'
-chmod +x ceph/install_ceph.sh
-chmod -R +x ceph/
-cd ceph/ && bash ./install_ceph.sh "$ip_master" "$punto_montaje"
-if [[ $nodo -eq 2 ]]; then
-    echo '-->Instalando keepalived'
-    keepalived "$ip_master" "$interface"
-    echo "-->listo"
-fi
+
+}
+
+#ip_master=$1
+#punto_montaje=$2
+#interface=$3
+#nodo=$4
+
+
