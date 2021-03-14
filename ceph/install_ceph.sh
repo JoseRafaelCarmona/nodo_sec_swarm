@@ -20,7 +20,7 @@ function existe_directorio(){
 
 function instalando_ceph(){
         pacman -Sy ceph
-        ssh root@localhost cat /root/.configsCluster/ips_cluster > /root/.configsCluster/ips_cluster
+        ssh root@$1 cat /root/.configsCluster/ips_cluster > /root/.configsCluster/ips_cluster
         archivo='/root/.configsCluster/ips_cluster'
         CONTADOR=0
         while read linea ; do
