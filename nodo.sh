@@ -16,9 +16,8 @@ function validarParams(){
 }
 
 function modoUso(){
-    echo 'Para ejecutar el script: nodo.sh IP-MANAGER PUNTO-MONTAJE NUMERO-DE-NODO'
-    echo 'Debemos de tener en cuenta la cantidad de nodos que ya estan unidos al cluster'
-    echo 'Ejemplo: ./nodo.sh 192.168.1.1 /dev/sda1 2'
+    echo 'Para ejecutar el script: nodo.sh IP-MANAGER PUNTO-MONTAJE'
+    echo 'Ejemplo: ./nodo.sh 192.168.1.1 /dev/sda1 ens33'
 }
 
 function usuario_root(){
