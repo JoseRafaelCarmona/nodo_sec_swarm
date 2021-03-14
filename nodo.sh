@@ -10,12 +10,14 @@ function validacion(){
 
 function validarParams(){
     [[ ! $# -eq 3 ]] && { echo -e "\e[31mTu número de parámetros no es el correcto\e[0m"; modoUso; exit 1; }
+    validar_direccion_ip $1
     validar_punto_montaje $2
     validar_interface $3
 }
 
 function modoUso(){
-    echo 'Para ejecutar el script: nodo.sh IP-MANAGER PUNTO-MONTAJE NUMERODE-NODO'
+    echo 'Para ejecutar el script: nodo.sh IP-MANAGER PUNTO-MONTAJE NUMERO-DE-NODO'
+    echo 'Debemos de tener en cuenta la cantidad de nodos que ya estan unidos al cluster'
     echo 'Ejemplo: ./nodo.sh 192.168.1.1 /dev/sda1 2'
 }
 
@@ -66,7 +68,6 @@ function conectarse_swarm(){
     echo -e "\e[32m       OK\e[0m";
 }
 
-
 function install_keepalived(){
          docker run -d --name keepalived --restart=always \
               --cap-add=NET_ADMIN --cap-add=NET_BROADCAST --cap-add=NET_RAW --net=host \
@@ -78,12 +79,12 @@ function install_keepalived(){
 }
 
 function keepalived(){
-        IP_VIRTUAL=$(ssh root@$1 cat /root/.configsCluster/.ip_virtual)
-        IP_NODO=$(ssh root@$1 cat /root/.configsCluster/nodo_backup_keepalived)
+        IP_VIRTUAL=$(ssh root@$1 cat /root/.configsCluster/ip_virtual)
+        IP_NODO=$(ssh root@$1 cat /root/.configsCluster/ip_nodo_backup)
         install_keepalived $1 $IP_NODO $IP_VIRTUAL $2
 }
 
-function main(){
+function comprobaciones(){
         validarParams "$@"
         echo '-->Comprobando si eres usuario root:'
         usuario_root
@@ -93,26 +94,52 @@ function main(){
         acceso_internet
         echo '-->Comprobando docker'
         validar_docker
+}
+
+function validar_direccion_ip(){
+        if [[ $1 =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+                OIFS=$IFS
+                IFS='.'
+                ip=($1)
+                IFS=$OIFS
+                if [[ ${ip[0]} -le 255 && ${ip[1]} -le 255  && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]; then
+                        echo -e "\e[32m OK\e[0m";
+                else
+                        echo -e "\e[31m Error\e[0m";
+                        exit 1;
+                fi
+        else
+                echo -e "\e[31m Tu seleccion es erronea\e[0m";
+                exit 1;
+        fi
+}
+
+function validar_ip_backup(){
+        ip_nodo=$(ssh root@$1 cat /root/.configsCluster/ip_nodo_backup)
+        ip add | grep $ip_nodo
+        if [[ "$(echo $?)" == "0" ]]; then
+                echo '-->Instalando keepalived'
+                keepalived "$1" "$2"
+        fi
+}
+
+function main(){
+        comprobaciones $1 $2 $3
         echo '-->Permitir login ssh root'
         permitir_root_login
-        echo '-->Conectanose a swarm'
+        mkdir /root/.configsCluster
+        echo '-->Conectandose a swarm'
         conectarse_swarm $1
         echo 'Iniciando la instalacion de ceph..'
         chmod +x ceph/install_ceph.sh
         chmod -R +x ceph/
-        cd ceph/ && bash ./install_ceph.sh "$ip_master" "$punto_montaje"
-        if [[ $nodo -eq 2 ]]; then
-            echo '-->Instalando keepalived'
-            keepalived "$ip_master" "$interface"
-            echo "-->listo"
-        fi
-
-
+        cd ceph/ && bash ./install_ceph.sh "$1" "$2"
+        validar_ip_backup $1 $3
 }
 
 #ip_master=$1
 #punto_montaje=$2
 #interface=$3
-#nodo=$4
 
+main $1 $2 $3
 

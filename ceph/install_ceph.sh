@@ -34,11 +34,15 @@ function crear_carpeta_ceph(){
 }
 
 function obteniendo_llave_ceph(){
-        ssh root@$1 cat /root/.ceph > /root/.ceph
+        ssh root@$1 cat /root/.configsCluster/.ceph_key > /root/.configsCluster/.ceph_key
 }
 
-install_xfsprogs $2
-instalando_ceph $1
-obteniendo_llave_ceph $1
-crear_carpeta_ceph $1
-echo "-->listo"
+function main(){
+        install_xfsprogs $2
+        instalando_ceph $1
+        obteniendo_llave_ceph $1
+        crear_carpeta_ceph $1
+        echo "-->listo"
+}
+
+main $1 $2
